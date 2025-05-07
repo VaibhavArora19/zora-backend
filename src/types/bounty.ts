@@ -1,12 +1,12 @@
-import { Document, Types } from 'mongoose';
+import { Document, Types } from "mongoose";
 
 export interface IBounty {
-  contract: string;
-  title: string;
-  metadata: string;
+  zoraPostLink: string;
+  budget: string;
+  campaignStartDate: Date;
+  campaignEndDate: Date;
+  keywords: string[];
   isFinalized: boolean;
-  bountyAmount: string;
-  deadline: Date;
   createdAt: Date;
   updatedAt: Date;
   creatorsPosts: Types.ObjectId[];

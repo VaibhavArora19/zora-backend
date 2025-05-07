@@ -5,8 +5,10 @@ import Bounty from "../models/bounty";
 export const getCreatorsPosts = async (tag: string) => {
   const response = await fetchByMention("20", tag);
 
-  const filteredData = response.results.casts.map((cast: any) => {
-    return {
+  const filteredData: any[] = [];
+
+  response.results.casts.filter((cast: any) => {
+    filteredData.push({
       hash: cast.hash,
       username: cast.author.username,
       display_name: cast.author.display_name,
@@ -20,12 +22,13 @@ export const getCreatorsPosts = async (tag: string) => {
       likes: cast.author.reactions.likes.fname,
       recasts: cast.author.reactions.recasts.fname,
       replies_count: cast.author.reactions.replies_count,
-    };
+    });
   });
 
   return filteredData;
 };
 
+//!this as of now inserts any post irrelevant of the date but need to make sure that it stores based on the date range
 export const fetchCreatorsPostsAndSave = async (parentHash: string, tag: string) => {
   const data = await getCreatorsPosts(tag);
 

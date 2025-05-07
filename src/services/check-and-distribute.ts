@@ -1,5 +1,5 @@
 import bounty from "../models/bounty";
-import { CreatorPostDocument, ICreatorPost } from "../types/bounty";
+import { ICreatorPost } from "../types/bounty";
 
 const weights = {
   likes: 1,
@@ -33,7 +33,7 @@ export const checkAndDistribute = async () => {
 
     // Step 3: Distribute budget based on score proportion
     usersScore.forEach((user) => {
-      user.score = totalScore > 0 ? (user.score / totalScore) * +bounty.bountyAmount : 0;
+      user.score = totalScore > 0 ? (user.score / totalScore) * +bounty.budget : 0;
     });
   });
 

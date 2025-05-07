@@ -1,14 +1,14 @@
 import mongoose, { Schema } from "mongoose";
 import { BountyDocument } from "../types/bounty";
 
-const bountySchema = new Schema({
-  contract: { type: String, required: true },
-  title: { type: String, required: true },
-  metadata: { type: String, required: true },
-  bountyAmount: { type: String, required: true },
-  deadline: { type: Date, required: true },
-  creatorsPosts: [{ type: [Schema.Types.ObjectId], ref: "CreatorPost" }],
+const bountySchema = new Schema<BountyDocument>({
+  zoraPostLink: { type: String, required: true },
+  budget: { type: String, required: true },
+  campaignStartDate: { type: Date, required: true },
+  campaignEndDate: { type: Date, required: true },
   isFinalized: { type: Boolean, required: true, default: false },
+  keywords: { type: [String], required: true },
+  creatorsPosts: [{ type: [Schema.Types.ObjectId], ref: "CreatorPost" }],
   createdAt: { type: Date, required: true, default: Date.now },
   updatedAt: { type: Date, required: true, default: Date.now },
 });

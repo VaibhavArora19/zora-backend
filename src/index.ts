@@ -6,7 +6,6 @@ import mongoose from "mongoose";
 import bountyRoutes from "./routes/bounty";
 import cron from "node-cron";
 import { getBountyInfoAndSaveCreator } from "./services/creatorsPost";
-import { get } from "http";
 
 dotenv.config();
 

@@ -29,3 +29,29 @@ export const fetchByMention = async (limit: string, query: string) => {
     throw error;
   }
 };
+
+export const postOnFarcaster = async (message: string) => {
+  try {
+    const url = new URL("https://api.neynar.com/v2/farcaster/post");
+    const response = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-api-key": process.env.API_KEY as string,
+      },
+      body: JSON.stringify({
+        signer_uuid: "8769925d-7bbe-4d7b-ae48-51541975533d", //!you need to createa a signer from the neynar docs, eveerytime new signer needed if api changes
+        text: message,
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`API error: ${response.status} ${response.statusText}`);
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error("Error posting on Farcaster:", error);
+    throw error;
+  }
+};

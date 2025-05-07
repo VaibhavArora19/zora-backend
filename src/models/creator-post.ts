@@ -11,12 +11,11 @@ const creatorPostSchema = new Schema<CreatorPostDocument>({
   followers: { type: Number, required: true },
   following: { type: Number, required: true },
   address: { type: String, required: true },
-  post: { type: String, required: true },
   likes_count: { type: Number, required: true },
   recasts_count: { type: Number, required: true },
-  likes: { type: [String], required: true },
-  recasts: { type: [String], required: true },
-  replies_count: { type: String, required: true },
+  likes: { type: [String] },
+  recasts: { type: [String] },
+  replies_count: { type: String },
 });
 
 const creatorPostModel = mongoose.model<CreatorPostDocument>("CreatorPost", creatorPostSchema);

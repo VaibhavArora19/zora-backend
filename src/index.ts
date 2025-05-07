@@ -5,6 +5,8 @@ import bodyParser from "body-parser";
 import mongoose from "mongoose";
 import bountyRoutes from "./routes/bounty";
 import cron from "node-cron";
+import { getBountyInfoAndSaveCreator } from "./services/creatorsPost";
+import { get } from "http";
 
 dotenv.config();
 
@@ -14,7 +16,9 @@ app.use(bodyParser.json());
 app.use(cors());
 app.use(bountyRoutes);
 
-cron.schedule("0 * * * *", async () => {});
+cron.schedule("0 * * * *", async () => {
+  await getBountyInfoAndSaveCreator();
+});
 
 mongoose.connect(process.env.DATABASE_URL as string);
 

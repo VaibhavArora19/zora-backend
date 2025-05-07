@@ -1,4 +1,6 @@
-export type Bounty = {
+import { Document, Types } from 'mongoose';
+
+export interface IBounty {
   contract: string;
   title: string;
   metadata: string;
@@ -7,10 +9,12 @@ export type Bounty = {
   deadline: Date;
   createdAt: Date;
   updatedAt: Date;
-  creatorsPosts: string[];
-};
+  creatorsPosts: Types.ObjectId[];
+}
 
-export type CreatorPost = {
+export interface BountyDocument extends IBounty, Document {}
+
+export interface ICreatorPost {
   hash: string;
   username: string;
   display_name: string;
@@ -24,4 +28,6 @@ export type CreatorPost = {
   likes: string[];
   recasts: string[];
   replies_count: string;
-};
+}
+
+export interface CreatorPostDocument extends ICreatorPost, Document {}

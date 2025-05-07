@@ -1,7 +1,7 @@
 import mongoose, { Document, Schema } from "mongoose";
-import { CreatorPost } from "../types/bounty";
+import { ICreatorPost } from "../types/bounty";
 
-export type CreatorPostDocument = Document & CreatorPost;
+export interface CreatorPostDocument extends ICreatorPost, Document {}
 
 const creatorPostSchema = new Schema<CreatorPostDocument>({
   hash: { type: String, required: true },

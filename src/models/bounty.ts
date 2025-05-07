@@ -1,9 +1,7 @@
-import mongoose, { Document, Schema } from "mongoose";
-import { Bounty } from "../types/bounty";
+import mongoose, { Schema } from "mongoose";
+import { BountyDocument } from "../types/bounty";
 
-export type BountyDocument = Document & Bounty;
-
-const bountySchema = new Schema<BountyDocument>({
+const bountySchema = new Schema({
   contract: { type: String, required: true },
   title: { type: String, required: true },
   metadata: { type: String, required: true },

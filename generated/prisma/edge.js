@@ -150,7 +150,7 @@ const config = {
     "isCustomOutput": true
   },
   "relativeEnvPaths": {
-    "rootEnvPath": "../../.env",
+    "rootEnvPath": null,
     "schemaEnvPath": "../../.env"
   },
   "relativePath": "../../prisma",
@@ -160,17 +160,18 @@ const config = {
     "db"
   ],
   "activeProvider": "postgresql",
+  "postinstall": false,
   "inlineDatasources": {
     "db": {
       "url": {
         "fromEnvVar": "DATABASE_URL",
-        "value": "prisma+postgres://accelerate.prisma-data.net/?api_key=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhcGlfa2V5IjoiYTlhM2RlZDgtZmE3OS00ZDA3LTgxYzQtYjgzOTFmNzEzMzY3IiwidGVuYW50X2lkIjoiM2ZmNmIxZjEyOTQ1OGRmMWQzZWU0YjNhNjA4NGU5ZTcyMWUwNDgwNjczMGYxZjY1NDhjMzZiMmNjZGYwMWJjMSIsImludGVybmFsX3NlY3JldCI6IjU4NjUxODUwLTBkZDYtNDdmZS04NmQ2LWRkMzBiNDZhZjliZCJ9.AFQxDrb0ihHeOMnqdnuTBh10O-iQ4KZjDh0C0E8O6x0"
+        "value": null
       }
     }
   },
   "inlineSchema": "// This is your Prisma schema file,\n// learn more about it in the docs: https://pris.ly/d/prisma-schema\n\n// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?\n// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init\n\ngenerator client {\n  provider = \"prisma-client-js\"\n  output   = \"../generated/prisma\"\n}\n\ndatasource db {\n  provider = \"postgresql\"\n  url      = env(\"DATABASE_URL\")\n}\n\nmodel Parent {\n  id       String    @id @default(uuid())\n  contract String\n  name     String\n  uri      String\n  Creator  Creator[]\n}\n\nmodel Creator {\n  id       String @id @default(uuid())\n  name     String\n  uri      String\n  parent   Parent @relation(fields: [parentId], references: [id])\n  parentId String\n}\n",
   "inlineSchemaHash": "1f905bb5db5b9677a0b353edcd05bc629b5251cd638c98e92bff52978708290f",
-  "copyEngine": false
+  "copyEngine": true
 }
 config.dirname = '/'
 

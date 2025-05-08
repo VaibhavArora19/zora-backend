@@ -6,6 +6,7 @@ import mongoose from "mongoose";
 import bountyRoutes from "./routes/bounty";
 import cron from "node-cron";
 import { getBountyInfoAndSaveCreator } from "./services/creatorsPost";
+import { postOnFarcaster } from "./tools/farcaster";
 
 dotenv.config();
 
@@ -15,8 +16,14 @@ app.use(bodyParser.json());
 app.use(cors());
 app.use(bountyRoutes);
 
-cron.schedule("0 * * * *", async () => {
-  await getBountyInfoAndSaveCreator();
+// cron.schedule("0 * * * *", async () => {
+//   await getBountyInfoAndSaveCreator();
+// });
+
+app.post("/post", async (req, res) => {
+  const data = await postOnFarcaster("hello");
+
+  res.json({ data: "" });
 });
 
 mongoose.connect(process.env.DATABASE_URL as string);

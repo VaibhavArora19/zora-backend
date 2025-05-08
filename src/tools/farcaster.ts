@@ -1,5 +1,6 @@
 import dotenv from "dotenv";
 dotenv.config();
+import { NeynarAPIClient } from "@neynar/nodejs-sdk";
 
 export const fetchByMention = async (limit: string, query: string) => {
   try {
@@ -31,27 +32,18 @@ export const fetchByMention = async (limit: string, query: string) => {
 };
 
 export const postOnFarcaster = async (message: string) => {
-  try {
-    const url = new URL("https://api.neynar.com/v2/farcaster/post");
-    const response = await fetch(url, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-api-key": process.env.API_KEY as string,
-      },
-      body: JSON.stringify({
-        signer_uuid: "8769925d-7bbe-4d7b-ae48-51541975533d", //!you need to createa a signer from the neynar docs, eveerytime new signer needed if api changes
-        text: message,
-      }),
+  const neynarClient = new NeynarAPIClient({
+    apiKey: process.env.API_KEY as string,
+  });
+  const signerUuid = "80105bb6-6818-4c6d-8752-7a2972131aa1";
+  const text = "Hello, World! 🪐";
+
+  neynarClient
+    .publishCast({
+      signerUuid,
+      text,
+    })
+    .then((response: any) => {
+      console.log("cast:", response.cast);
     });
-
-    if (!response.ok) {
-      throw new Error(`API error: ${response.status} ${response.statusText}`);
-    }
-
-    return await response.json();
-  } catch (error) {
-    console.error("Error posting on Farcaster:", error);
-    throw error;
-  }
 };

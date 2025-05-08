@@ -3,19 +3,19 @@ import { Document, Types } from "mongoose";
 export interface IBounty {
   zoraPostLink: string;
   budget: string;
-  uniqueTag: string;
   campaignStartDate: Date;
   campaignEndDate: Date;
   keywords: string[];
   isFinalized: boolean;
   createdAt: Date;
   updatedAt: Date;
-  creatorsPosts: Types.ObjectId[];
+  creatorsPostsFarcaster: Types.ObjectId[];
+  creatorsPostsZora: Types.ObjectId[];
 }
 
 export interface BountyDocument extends IBounty, Document {}
 
-export interface ICreatorPost {
+export interface ICreatorPostFarcaster {
   hash: string;
   username: string;
   display_name: string;
@@ -31,4 +31,15 @@ export interface ICreatorPost {
   replies_count: string;
 }
 
-export interface CreatorPostDocument extends ICreatorPost, Document {}
+export interface ICreatorPostZora {
+  address: string;
+  creatorAddress: string;
+  marketCap: number;
+  uniqueHolders: number;
+  mediaContent: string[];
+  volume: number;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface CreatorPostDocument extends ICreatorPostFarcaster, Document {}

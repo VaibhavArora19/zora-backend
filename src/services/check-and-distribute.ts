@@ -1,60 +1,83 @@
+import { ObjectId } from "mongoose";
 import bounty from "../models/bounty";
-import { ICreatorPost } from "../types/bounty";
+import { BountyDocument, IBounty, ICreatorPostFarcaster, ICreatorPostZora } from "../types/bounty";
+import { calculatePostScore } from "./calculate-score";
 
-const weights = {
-  likes: 1,
-  recasts: 3,
-  impressions: 0.01,
-};
+// Define a type for the populated result
+interface PopulatedBounty extends Omit<BountyDocument, "creatorsPostsFarcaster" | "creatorsPostsZora"> {
+  creatorsPostsFarcaster: ICreatorPostFarcaster[];
+  creatorsPostsZora: ICreatorPostZora[];
+}
 
 export const checkAndDistribute = async () => {
   try {
-    const bountyInfo = await bounty.find({ 
-      campaignEndDate: { $lt: new Date() }, 
-      isFinalized: false 
-    })
-    .lean()
-    .populate<{ creatorsPosts: ICreatorPost[] }>({
-      path: "creatorsPosts",
-      model: "CreatorPost",
-      select: 'address likes_count recasts_count' // Only select fields we need
-    })
-    .exec();
+    //@ts-ignore
+    const bountyInfo = (await bounty
+      .find({
+        campaignEndDate: { $lt: new Date() },
+        isFinalized: false,
+      })
+      .lean()
+      .populate<{ creatorsPostsFarcaster: ICreatorPostFarcaster[] }>({
+        path: "creatorsPostsFarcaster",
+        model: "CreatorPostFarcaster",
+        select: "address likes_count recasts_count", // Only select fields we need
+      })
+      .populate<{ creatorPostsZora: ICreatorPostZora[] }>({
+        path: "creatorsPostsZora",
+        model: "CreatorPostZora",
+        select: "address marketCap uniqueHolders volume", // Only select fields we need
+      })
+      .exec()) as PopulatedBounty[];
 
-  const usersScore: Array<{
-    address: string;
-    score: number;
-  }> = [];
+    if (!bountyInfo || bountyInfo.length === 0) {
+      return [];
+    }
 
-  if (!bountyInfo || bountyInfo.length === 0) {
-    return [];
-  }
+    const usersScorePerBounty: any[] = [];
 
-  bountyInfo.forEach((bounty) => {
-    // Step 1: Calculate weighted score for each user
-    if (!bounty.creatorsPosts) return;
-    
-    bounty.creatorsPosts.forEach((user) => {
-      if (!user) return;
-      const score = (user.likes_count || 0) * weights.likes + (user.recasts_count || 0) * weights.recasts;
-      usersScore.push({
-        address: user.address,
-        score,
+    bountyInfo.forEach((bounty) => {
+      if (!bounty.creatorsPostsFarcaster || !bounty.creatorsPostsZora) return;
+
+      //!we should use unique id here probably
+      usersScorePerBounty.push({
+        id: (bounty._id as ObjectId).toString(),
+      });
+
+      //@ts-ignore
+      const farcasterScore = [];
+
+      //@ts-ignore
+      const zoraScore = [];
+
+      bounty.creatorsPostsFarcaster.forEach(async (creatorPost) => {
+        const score = calculatePostScore(creatorPost, "farcaster");
+
+        farcasterScore.push({
+          address: creatorPost.address,
+          score: score,
+        });
+      });
+
+      bounty.creatorsPostsZora.forEach(async (creatorPost) => {
+        const score = calculatePostScore(creatorPost, "zora");
+
+        zoraScore.push({
+          address: creatorPost.address,
+          score: score,
+        });
+      });
+
+      usersScorePerBounty.push({
+        id: (bounty._id as ObjectId).toString(),
+        farcasterScore,
+        zoraScore,
       });
     });
 
-    // Step 2: Calculate total score
-    const totalScore = usersScore.reduce((sum, user) => sum + user.score, 0);
-
-    // Step 3: Distribute budget based on score proportion
-    usersScore.forEach((user) => {
-      user.score = totalScore > 0 ? (user.score / totalScore) * +bounty.budget : 0;
-    });
-  });
-
-    return usersScore;
+    // return usersScore;
   } catch (error) {
-    console.error('Error in checkAndDistribute:', error);
+    console.error("Error in checkAndDistribute:", error);
     throw error;
   }
 };

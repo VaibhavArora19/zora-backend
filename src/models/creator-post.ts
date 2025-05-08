@@ -1,9 +1,9 @@
 import mongoose, { Document, Schema } from "mongoose";
-import { ICreatorPost } from "../types/bounty";
+import { ICreatorPostFarcaster } from "../types/bounty";
 
-export interface CreatorPostDocument extends ICreatorPost, Document {}
+export interface CreatorPostFarcasterDocument extends ICreatorPostFarcaster, Document {}
 
-const creatorPostSchema = new Schema<CreatorPostDocument>({
+const creatorPostFarcasterSchema = new Schema<CreatorPostFarcasterDocument>({
   hash: { type: String, required: true },
   username: { type: String, required: true },
   display_name: { type: String, required: true },
@@ -18,6 +18,19 @@ const creatorPostSchema = new Schema<CreatorPostDocument>({
   replies_count: { type: String },
 });
 
-const creatorPostModel = mongoose.model<CreatorPostDocument>("CreatorPost", creatorPostSchema);
+const creatorPostZoraSchema = new Schema({
+  address: { type: String, required: true },
+  creatorAddress: { type: String, required: true },
+  marketCap: { type: Number, required: true },
+  uniqueHolders: { type: Number, required: true },
+  mediaContent: { type: [String] },
+  volume: { type: Number, required: true },
+  createdAt: { type: Date, required: true, default: Date.now },
+  updatedAt: { type: Date, required: true, default: Date.now },
+});
 
-export default creatorPostModel;
+const creatorPostFarcasterModel = mongoose.model<CreatorPostFarcasterDocument>("CreatorPostFarcaster", creatorPostFarcasterSchema);
+
+const creatorPostZoraModel = mongoose.model("CreatorPostZora", creatorPostZoraSchema);
+
+export default { creatorPostFarcasterModel, creatorPostZoraModel };

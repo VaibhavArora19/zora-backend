@@ -7,18 +7,15 @@ export const createBounty = async (req: Request, res: Response, next: NextFuncti
   const { zoraPostLink, budget, campaignStartDate, campaignEndDate, keywords } = req.body;
 
   try {
-    const uniqueTag = randomstring.generate(9);
-
     const newBounty = new bounty({
       zoraPostLink,
       budget,
-      uniqueTag,
       campaignStartDate,
       campaignEndDate,
       keywords,
     });
 
-    const message = `New bounty created with unique tag: ${uniqueTag}. \n\nCheck it out here: ${zoraPostLink} \n\nBudget: ${budget}. \n\nCampaign Start Date: ${campaignStartDate}. \n\nCampaign End Date: ${campaignEndDate}. Keywords: ${keywords.join(
+    const message = `New bounty created. \n\nCheck it out here: ${zoraPostLink} \n\nBudget: ${budget}. \n\nCampaign Start Date: ${campaignStartDate}. \n\nCampaign End Date: ${campaignEndDate}. Keywords: ${keywords.join(
       ", "
     )}`;
     await postOnFarcaster(message);

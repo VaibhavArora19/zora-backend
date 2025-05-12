@@ -1,8 +1,10 @@
 import { Document, Types } from "mongoose";
 
 export interface IBounty {
-  zoraPostLink: string;
+  link: string;
+  isZora: boolean;
   budget: string;
+  uniqueKeyword: string;
   campaignStartDate: Date;
   campaignEndDate: Date;
   keywords: string[];

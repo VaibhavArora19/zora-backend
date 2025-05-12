@@ -2,8 +2,10 @@ import mongoose, { Schema } from "mongoose";
 import { BountyDocument } from "../types/bounty";
 
 const bountySchema = new Schema<BountyDocument>({
-  zoraPostLink: { type: String, required: true },
+  link: { type: String, required: true },
+  isZora: { type: Boolean, default: false },
   budget: { type: String, required: true },
+  uniqueKeyword: { type: String, required: true, unique: true },
   campaignStartDate: { type: Date, required: true },
   campaignEndDate: { type: Date, required: true },
   isFinalized: { type: Boolean, default: false },

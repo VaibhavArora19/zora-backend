@@ -3,8 +3,8 @@ import { ICreatorPostFarcaster } from "../types/bounty";
 
 export interface CreatorPostFarcasterDocument extends ICreatorPostFarcaster, Document {}
 
-const creatorPostFarcasterSchema = new Schema<CreatorPostFarcasterDocument>({
-  hash: { type: String, required: true },
+const creatorPostFarcasterSchema = new Schema({
+  hash: { type: String, required: true, unique: true },
   username: { type: String, required: true },
   display_name: { type: String, required: true },
   pfp_url: { type: String, required: true },
@@ -16,10 +16,12 @@ const creatorPostFarcasterSchema = new Schema<CreatorPostFarcasterDocument>({
   likes: { type: [String] },
   recasts: { type: [String] },
   replies_count: { type: String },
+  createdAt: { type: Date, required: true, default: Date.now },
+  updatedAt: { type: Date, required: true, default: Date.now },
 });
 
 const creatorPostZoraSchema = new Schema({
-  address: { type: String, required: true },
+  address: { type: String, required: true, unique: true },
   creatorAddress: { type: String, required: true },
   marketCap: { type: Number, required: true },
   uniqueHolders: { type: Number, required: true },
@@ -29,7 +31,7 @@ const creatorPostZoraSchema = new Schema({
   updatedAt: { type: Date, required: true, default: Date.now },
 });
 
-const creatorPostFarcasterModel = mongoose.model<CreatorPostFarcasterDocument>("CreatorPostFarcaster", creatorPostFarcasterSchema);
+const creatorPostFarcasterModel = mongoose.model("CreatorPostFarcaster", creatorPostFarcasterSchema);
 
 const creatorPostZoraModel = mongoose.model("CreatorPostZora", creatorPostZoraSchema);
 

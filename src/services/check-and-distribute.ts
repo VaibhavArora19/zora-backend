@@ -1,12 +1,12 @@
 import { ObjectId } from "mongoose";
 import bounty from "../models/bounty";
-import { BountyDocument, IBounty, ICreatorPostFarcaster, ICreatorPostZora } from "../types/bounty";
+import { BountyDocument, ICreatorPostFarcaster, ICreatorPostZora } from "../types/bounty";
 import { calculatePostScore } from "./calculate-score";
 
 // Define a type for the populated result
 interface PopulatedBounty extends Omit<BountyDocument, "creatorsPostsFarcaster" | "creatorsPostsZora"> {
-  creatorsPostsFarcaster: ICreatorPostFarcaster[];
-  creatorsPostsZora: ICreatorPostZora[];
+  creatorsPostsFarcaster: Array<ICreatorPostFarcaster[]>;
+  creatorsPostsZora: Array<ICreatorPostZora[]>;
 }
 
 export const checkAndDistribute = async () => {
@@ -36,21 +36,16 @@ export const checkAndDistribute = async () => {
 
     const usersScorePerBounty: any[] = [];
 
-    bountyInfo.forEach((bounty) => {
-      if (!bounty.creatorsPostsFarcaster || !bounty.creatorsPostsZora) return;
-
-      //!we should use unique id here probably
-      usersScorePerBounty.push({
-        id: (bounty._id as ObjectId).toString(),
-      });
-
+    bountyInfo.forEach(async (bountyDetails) => {
+      if (!bountyDetails.creatorsPostsFarcaster || !bountyDetails.creatorsPostsZora) return;
       //@ts-ignore
       const farcasterScore = [];
 
       //@ts-ignore
       const zoraScore = [];
 
-      bounty.creatorsPostsFarcaster.forEach(async (creatorPost) => {
+      //@ts-ignore
+      bountyDetails.creatorsPostsFarcaster[0].forEach(async (creatorPost: ICreatorPostFarcaster) => {
         const score = calculatePostScore(creatorPost, "farcaster");
 
         farcasterScore.push({
@@ -59,7 +54,8 @@ export const checkAndDistribute = async () => {
         });
       });
 
-      bounty.creatorsPostsZora.forEach(async (creatorPost) => {
+      //@ts-ignore
+      bounty.creatorsPostsZora[0]?.forEach(async (creatorPost: ICreatorPostZora) => {
         const score = calculatePostScore(creatorPost, "zora");
 
         zoraScore.push({
@@ -69,11 +65,18 @@ export const checkAndDistribute = async () => {
       });
 
       usersScorePerBounty.push({
-        id: (bounty._id as ObjectId).toString(),
+        id: (bountyDetails._id as ObjectId).toString(),
+        //@ts-ignore
         farcasterScore,
+        //@ts-ignore
         zoraScore,
       });
+
+      //!send scores here
+      await bounty.findOneAndUpdate({ _id: bountyDetails._id }, { isFinalized: true });
     });
+
+    console.log("Users Score Per Bounty:", usersScorePerBounty[0].farcasterScore);
 
     // return usersScore;
   } catch (error) {

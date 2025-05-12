@@ -35,13 +35,12 @@ export const postOnFarcaster = async (message: string) => {
   const neynarClient = new NeynarAPIClient({
     apiKey: process.env.API_KEY as string,
   });
-  const signerUuid = "80105bb6-6818-4c6d-8752-7a2972131aa1";
-  const text = "Hello, World! 🪐";
+  const signerUuid = "27a08f94-a6a1-4180-8830-1635db9361df";
 
   neynarClient
     .publishCast({
       signerUuid,
-      text,
+      text: message,
     })
     .then((response: any) => {
       console.log("cast:", response.cast);

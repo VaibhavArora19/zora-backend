@@ -4,18 +4,22 @@ import randomstring from "randomstring";
 import { postOnFarcaster } from "../tools/farcaster";
 
 export const createBounty = async (req: Request, res: Response, next: NextFunction) => {
-  const { zoraPostLink, budget, campaignStartDate, campaignEndDate, keywords } = req.body;
+  const { link, isZora, budget, campaignStartDate, campaignEndDate, keywords } = req.body;
+
+  const uniqueKeyword = randomstring.generate(7);
 
   try {
     const newBounty = new bounty({
-      zoraPostLink,
+      link,
+      isZora,
+      uniqueKeyword,
       budget,
       campaignStartDate,
       campaignEndDate,
       keywords,
     });
 
-    const message = `New bounty created. \n\nCheck it out here: ${zoraPostLink} \n\nBudget: ${budget}. \n\nCampaign Start Date: ${campaignStartDate}. \n\nCampaign End Date: ${campaignEndDate}. Keywords: ${keywords.join(
+    const message = `Post: ${uniqueKeyword} \n\nNew bounty created for the token ${link} \n\nBudget: ${budget}. \n\nCampaign Start Date: ${campaignStartDate}. \n\nCampaign End Date: ${campaignEndDate}. Keywords: ${keywords.join(
       ", "
     )}`;
     await postOnFarcaster(message);

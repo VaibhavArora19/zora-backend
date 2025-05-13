@@ -6,7 +6,6 @@ import mongoose from "mongoose";
 import bountyRoutes from "./routes/bounty";
 import cron from "node-cron";
 import { getBountyInfoAndSaveCreator } from "./services/creatorsPost";
-import { postOnFarcaster } from "./tools/farcaster";
 import { checkAndDistribute } from "./services/check-and-distribute";
 
 dotenv.config();
@@ -24,6 +23,10 @@ cron.schedule("0 * * * *", async () => {
   setTimeout(() => {
     checkAndDistribute();
   }, 10 * 60 * 1000);
+});
+
+app.get("/", (req, res) => {
+  res.send("Hello Coincast");
 });
 
 mongoose.connect(process.env.DATABASE_URL as string);

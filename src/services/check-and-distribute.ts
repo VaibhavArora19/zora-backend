@@ -1,6 +1,6 @@
-import mongoose, { Mongoose, ObjectId } from "mongoose";
+import mongoose from "mongoose";
 import bounty from "../models/bounty";
-import { BountyDocument, ICreatorPostFarcaster, ICreatorPostZora } from "../types/bounty";
+import { BountyDocument } from "../types/bounty";
 import { calculateRewards } from "./calculate-score";
 
 export type ICreatorPostFarcasterPoints = {
@@ -54,6 +54,8 @@ export const checkAndDistribute = async () => {
 
     for (const bountyData of bountyInfo) {
       const rewards = calculateRewards(bountyData.creatorsPostsFarcaster[0], bountyData.creatorsPostsZora[0]);
+
+      //*send these details to the contract
 
       //distribute rewards here
       await bounty.findOneAndUpdate({ _id: bountyData._id }, { $set: { isFinalized: true } });

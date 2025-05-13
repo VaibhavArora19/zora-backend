@@ -106,7 +106,7 @@ export const fetchCreatorsPostsAndSave = async (uniqueKeyword: string, parentHas
 };
 
 export const getBountyInfoAndSaveCreator = async () => {
-  const bountyInfo = await bounty.find({ isFinalized: false });
+  const bountyInfo = await bounty.find({ campaignEndDate: { $lt: new Date() }, isFinalized: false });
 
   if (!bountyInfo) {
     console.log("No bounty is exceeding deadline");

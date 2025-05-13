@@ -55,8 +55,10 @@ export const getCreatorsPostsZora = async (url: string) => {
 
 //!this as of now inserts any post irrelevant of the date but need to make sure that it stores based on the date range
 export const fetchCreatorsPostsAndSave = async (uniqueKeyword: string, parentHash: string) => {
-  const data = await getCreatorsPosts(uniqueKeyword);
+  let data = await getCreatorsPosts(uniqueKeyword);
   //!but we want to filter it based on the date range as well and based on the post that it is meant for
+
+  data = data.filter((post) => post.username !== "!1059812"); //do not pickup what bot has mentioned
 
   if (data.length === 0) return;
 
@@ -90,7 +92,7 @@ export const fetchCreatorsPostsAndSave = async (uniqueKeyword: string, parentHas
   }
 
   const updatedData = await bounty.findOneAndUpdate(
-    { zoraPostLink: parentHash },
+    { link: parentHash },
     {
       $set: {
         creatorsPostsFarcaster: farcasterInfo.map((p) => new mongoose.Types.ObjectId(p._id)),
@@ -104,9 +106,12 @@ export const fetchCreatorsPostsAndSave = async (uniqueKeyword: string, parentHas
 };
 
 export const getBountyInfoAndSaveCreator = async () => {
-  const bountyInfo = await bounty.find({ campaignEndDate: { $lt: new Date() }, isFinalized: false });
+  const bountyInfo = await bounty.find({ isFinalized: false });
 
-  if (!bountyInfo) return;
+  if (!bountyInfo) {
+    console.log("No bounty is exceeding deadline");
+    return;
+  }
 
   for (const bountyData of bountyInfo) {
     await fetchCreatorsPostsAndSave(bountyData.uniqueKeyword, bountyData.link);

@@ -13,6 +13,7 @@ const creatorPostFarcasterSchema = new Schema({
   address: { type: String, required: true },
   likes_count: { type: Number, required: true },
   recasts_count: { type: Number, required: true },
+  post: { type: String, required: true },
   likes: { type: [String] },
   recasts: { type: [String] },
   replies_count: { type: String },

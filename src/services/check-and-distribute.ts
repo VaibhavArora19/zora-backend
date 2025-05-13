@@ -52,10 +52,11 @@ export const checkAndDistribute = async () => {
       return [];
     }
 
-    for (const bounty of bountyInfo) {
-      const rewards = calculateRewards(bounty.creatorsPostsFarcaster[0], bounty.creatorsPostsZora[0]);
+    for (const bountyData of bountyInfo) {
+      const rewards = calculateRewards(bountyData.creatorsPostsFarcaster[0], bountyData.creatorsPostsZora[0]);
 
       //distribute rewards here
+      await bounty.findOneAndUpdate({ _id: bountyData._id }, { $set: { isFinalized: true } });
     }
   } catch (error) {
     console.error("Error in checkAndDistribute:", error);

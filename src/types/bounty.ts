@@ -3,7 +3,7 @@ import { Document, Types } from "mongoose";
 export interface IBounty {
   link: string;
   isZora: boolean;
-  budget: string;
+  budgetPercentage: string;
   uniqueKeyword: string;
   campaignStartDate: Date;
   campaignEndDate: Date;

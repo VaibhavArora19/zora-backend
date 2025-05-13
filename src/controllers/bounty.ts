@@ -4,7 +4,7 @@ import randomstring from "randomstring";
 import { postOnFarcaster } from "../tools/farcaster";
 
 export const createBounty = async (req: Request, res: Response, next: NextFunction) => {
-  const { link, isZora, budget, campaignStartDate, campaignEndDate, keywords } = req.body;
+  const { link, isZora, budgetPercentage, campaignStartDate, campaignEndDate, keywords } = req.body;
 
   const uniqueKeyword = randomstring.generate(7);
 
@@ -13,19 +13,19 @@ export const createBounty = async (req: Request, res: Response, next: NextFuncti
       link,
       isZora,
       uniqueKeyword,
-      budget,
+      budgetPercentage,
       campaignStartDate,
       campaignEndDate,
       keywords,
     });
 
-    const message = `Post: ${uniqueKeyword} \n\nNew bounty created for the token ${link} \n\nBudget: ${budget} \n\nCampaign Start Date: ${campaignStartDate} \n\nCampaign End Date: ${campaignEndDate}. \n\nKeywords: ${keywords.join(
+    const message = `Post: ${uniqueKeyword} \n\nNew bounty created for the token ${link} \n\nTrading fees percentage: ${budgetPercentage}% \n\nCampaign Start Date: ${campaignStartDate.toLocaleString()} \n\nCampaign End Date: ${campaignEndDate.toLocaleString()}. \n\nKeywords: ${keywords.join(
       ", "
     )}`;
     await postOnFarcaster(message);
 
     await newBounty.save();
-    res.json({ newBounty });
+    res.status(201).json({ newBounty });
   } catch (error) {
     res.json({ error: "Error creating bounty" });
   }

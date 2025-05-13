@@ -4,7 +4,7 @@ import { BountyDocument } from "../types/bounty";
 const bountySchema = new Schema<BountyDocument>({
   link: { type: String, required: true },
   isZora: { type: Boolean, default: false },
-  budget: { type: String, required: true },
+  budgetPercentage: { type: String, required: true },
   uniqueKeyword: { type: String, required: true, unique: true },
   campaignStartDate: { type: Date, required: true },
   campaignEndDate: { type: Date, required: true },

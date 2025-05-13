@@ -25,7 +25,7 @@ export const getCreatorsPosts = async (tag: string) => {
       recasts_count: cast.reactions.recasts_count,
       likes: cast.reactions.likes.fname,
       recasts: cast.reactions.recasts.fname,
-      replies_count: cast.reactions?.replies?.count,
+      replies_count: cast?.replies?.count,
     });
   });
 

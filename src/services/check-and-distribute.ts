@@ -1,12 +1,30 @@
-import { ObjectId } from "mongoose";
+import mongoose, { Mongoose, ObjectId } from "mongoose";
 import bounty from "../models/bounty";
 import { BountyDocument, ICreatorPostFarcaster, ICreatorPostZora } from "../types/bounty";
-import { calculatePostScore } from "./calculate-score";
+import { calculateRewards } from "./calculate-score";
+
+export type ICreatorPostFarcasterPoints = {
+  _id: mongoose.Types.ObjectId;
+  address: string;
+  likes_count: number;
+  recasts_count: number;
+  replies_count: number;
+  followers: number;
+  following: number;
+};
+
+export type ICreatorPostZoraPoints = {
+  _id: mongoose.Types.ObjectId;
+  address: string;
+  marketCap: number;
+  uniqueHolders: number;
+  volume: number;
+};
 
 // Define a type for the populated result
 interface PopulatedBounty extends Omit<BountyDocument, "creatorsPostsFarcaster" | "creatorsPostsZora"> {
-  creatorsPostsFarcaster: Array<ICreatorPostFarcaster[]>;
-  creatorsPostsZora: Array<ICreatorPostZora[]>;
+  creatorsPostsFarcaster: Array<ICreatorPostFarcasterPoints[]>;
+  creatorsPostsZora: Array<ICreatorPostZoraPoints[]>;
 }
 
 export const checkAndDistribute = async () => {
@@ -18,12 +36,12 @@ export const checkAndDistribute = async () => {
         isFinalized: false,
       })
       .lean()
-      .populate<{ creatorsPostsFarcaster: ICreatorPostFarcaster[] }>({
+      .populate<{ creatorsPostsFarcaster: ICreatorPostFarcasterPoints[] }>({
         path: "creatorsPostsFarcaster",
         model: "CreatorPostFarcaster",
-        select: "address likes_count recasts_count", // Only select fields we need
+        select: "address likes_count recasts_count replies_count followers following", // Only select fields we need
       })
-      .populate<{ creatorPostsZora: ICreatorPostZora[] }>({
+      .populate<{ creatorPostsZora: ICreatorPostZoraPoints[] }>({
         path: "creatorsPostsZora",
         model: "CreatorPostZora",
         select: "address marketCap uniqueHolders volume", // Only select fields we need
@@ -34,51 +52,11 @@ export const checkAndDistribute = async () => {
       return [];
     }
 
-    const usersScorePerBounty: any[] = [];
+    for (const bounty of bountyInfo) {
+      const rewards = calculateRewards(bounty.creatorsPostsFarcaster[0], bounty.creatorsPostsZora[0]);
 
-    bountyInfo.forEach(async (bountyDetails) => {
-      if (!bountyDetails.creatorsPostsFarcaster || !bountyDetails.creatorsPostsZora) return;
-      //@ts-ignore
-      const farcasterScore = [];
-
-      //@ts-ignore
-      const zoraScore = [];
-
-      //@ts-ignore
-      bountyDetails.creatorsPostsFarcaster[0].forEach(async (creatorPost: ICreatorPostFarcaster) => {
-        const score = calculatePostScore(creatorPost, "farcaster");
-
-        farcasterScore.push({
-          address: creatorPost.address,
-          score: score,
-        });
-      });
-
-      //@ts-ignore
-      bounty.creatorsPostsZora[0]?.forEach(async (creatorPost: ICreatorPostZora) => {
-        const score = calculatePostScore(creatorPost, "zora");
-
-        zoraScore.push({
-          address: creatorPost.address,
-          score: score,
-        });
-      });
-
-      usersScorePerBounty.push({
-        id: (bountyDetails._id as ObjectId).toString(),
-        //@ts-ignore
-        farcasterScore,
-        //@ts-ignore
-        zoraScore,
-      });
-
-      //!send scores here
-      await bounty.findOneAndUpdate({ _id: bountyDetails._id }, { isFinalized: true });
-    });
-
-    console.log("Users Score Per Bounty:", usersScorePerBounty[0].farcasterScore);
-
-    // return usersScore;
+      //distribute rewards here
+    }
   } catch (error) {
     console.error("Error in checkAndDistribute:", error);
     throw error;

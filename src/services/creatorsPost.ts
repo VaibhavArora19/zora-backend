@@ -26,6 +26,7 @@ export const getCreatorsPosts = async (tag: string) => {
       likes: cast.reactions.likes.fname,
       recasts: cast.reactions.recasts.fname,
       replies_count: cast?.replies?.count,
+      timestamp: cast?.timestamp,
     });
   });
 
@@ -53,12 +54,10 @@ export const getCreatorsPostsZora = async (url: string) => {
   };
 };
 
-//!this as of now inserts any post irrelevant of the date but need to make sure that it stores based on the date range
-export const fetchCreatorsPostsAndSave = async (uniqueKeyword: string, parentHash: string) => {
+export const fetchCreatorsPostsAndSave = async (uniqueKeyword: string, parentHash: string, campaignStartDate: Date, campaignEndDate: Date) => {
   let data = await getCreatorsPosts(uniqueKeyword);
-  //!but we want to filter it based on the date range as well and based on the post that it is meant for
 
-  data = data.filter((post) => post.username !== "!1059812"); //do not pickup what bot has mentioned
+  data = data.filter((post) => post.username !== "!1059812" || (post.timestamp > campaignStartDate && post.timestamp < campaignEndDate)); //do not pickup what bot has mentioned
 
   if (data.length === 0) return;
 
@@ -114,6 +113,6 @@ export const getBountyInfoAndSaveCreator = async () => {
   }
 
   for (const bountyData of bountyInfo) {
-    await fetchCreatorsPostsAndSave(bountyData.uniqueKeyword, bountyData.link);
+    await fetchCreatorsPostsAndSave(bountyData.uniqueKeyword, bountyData.link, bountyData.campaignStartDate, bountyData.campaignEndDate);
   }
 };

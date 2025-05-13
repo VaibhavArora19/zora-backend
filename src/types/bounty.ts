@@ -5,6 +5,7 @@ export interface IBounty {
   isZora: boolean;
   budgetPercentage: string;
   uniqueKeyword: string;
+  splitAddress: string;
   campaignStartDate: Date;
   campaignEndDate: Date;
   keywords: string[];

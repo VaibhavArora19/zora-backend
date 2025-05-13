@@ -17,6 +17,7 @@ const creatorPostFarcasterSchema = new Schema({
   likes: { type: [String] },
   recasts: { type: [String] },
   replies_count: { type: String },
+  timestamp: { type: Date, required: true },
   createdAt: { type: Date, required: true, default: Date.now },
   updatedAt: { type: Date, required: true, default: Date.now },
 });

@@ -4,7 +4,7 @@ import randomstring from "randomstring";
 import { postOnFarcaster } from "../tools/farcaster";
 
 export const createBounty = async (req: Request, res: Response, next: NextFunction) => {
-  const { link, isZora, budgetPercentage, campaignStartDate, campaignEndDate, keywords } = req.body;
+  const { link, isZora, splitAddress, budgetPercentage, campaignStartDate, campaignEndDate, keywords } = req.body;
 
   const uniqueKeyword = randomstring.generate(7);
 
@@ -13,6 +13,7 @@ export const createBounty = async (req: Request, res: Response, next: NextFuncti
       link,
       isZora,
       uniqueKeyword,
+      splitAddress,
       budgetPercentage,
       campaignStartDate,
       campaignEndDate,

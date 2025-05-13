@@ -6,6 +6,7 @@ const bountySchema = new Schema<BountyDocument>({
   isZora: { type: Boolean, default: false },
   budgetPercentage: { type: String, required: true },
   uniqueKeyword: { type: String, required: true, unique: true },
+  splitAddress: { type: String, required: true },
   campaignStartDate: { type: Date, required: true },
   campaignEndDate: { type: Date, required: true },
   isFinalized: { type: Boolean, default: false },

@@ -27,7 +27,7 @@ const creatorPostZoraSchema = new Schema({
   creatorAddress: { type: String, required: true },
   marketCap: { type: Number, required: true },
   uniqueHolders: { type: Number, required: true },
-  mediaContent: { type: [String] },
+  mediaContent: { type: Schema.Types.Mixed },
   volume: { type: Number, required: true },
   createdAt: { type: Date, required: true, default: Date.now },
   updatedAt: { type: Date, required: true, default: Date.now },

@@ -55,29 +55,28 @@ export function calculateRewards(farcasterData: ICreatorPostFarcasterPoints[], z
     }
   };
 
+  // Process Farcaster data
   for (const metric in farcasterMetricWeights) {
     const key = metric as keyof Omit<FarcasterUser, "address">;
-
-    const total = farcasterData.reduce((sum, obj) => sum + (obj[key] || 0), 0);
-
+    const total = farcasterData.reduce((sum, obj) => sum + (Number(obj[key]) || 0), 0);
     if (total === 0) continue;
 
     for (const obj of farcasterData) {
-      const value = obj[key] || 0;
+      const value = Number(obj[key]) || 0;
       const weight = farcasterWeight * farcasterMetricWeights[key];
       const normalized = (value / total) * weight;
       addScore(obj.address, normalized);
     }
   }
 
+  // Process Zora data
   for (const metric in zoraMetricWeights) {
     const key = metric as keyof Omit<ZoraUser, "address">;
-    console.log("key: ", zoraData);
-    const total = zoraData && zoraData.length > 0 ? zoraData?.reduce((sum, obj) => sum + (obj[key] || 0), 0) : 0;
+    const total = zoraData.reduce((sum, obj) => sum + (Number(obj[key]) || 0), 0);
     if (total === 0) continue;
 
     for (const obj of zoraData) {
-      const value = obj[key] || 0;
+      const value = Number(obj[key]) || 0;
       const weight = zoraWeight * zoraMetricWeights[key];
       const normalized = (value / total) * weight;
       addScore(obj.address, normalized);
@@ -88,7 +87,7 @@ export function calculateRewards(farcasterData: ICreatorPostFarcasterPoints[], z
 
   const rewardDistribution: RewardEntry[] = scoreMap.map((entry) => ({
     address: entry.address,
-    rewardPercentage: parseFloat(((entry.score / totalScore) * 100).toFixed(4)),
+    rewardPercentage: totalScore > 0 ? parseFloat(((entry.score / totalScore) * 100).toFixed(4)) : 0,
   }));
 
   return rewardDistribution;

@@ -42,15 +42,15 @@ export const getCreatorsPostsZora = async (url: string) => {
 
   const coin = await fetchSingleCoin(address);
 
-  if (!coin || !coin.data) return null;
+  if (!coin) return null;
 
   return {
-    address: coin?.data?.zora20Token?.address,
-    creatorAddress: coin?.data?.zora20Token?.creatorAddress,
-    marketCap: coin?.data?.zora20Token?.marketCap,
-    uniqueHolders: coin?.data?.zora20Token?.uniqueHolders,
-    mediaContent: coin?.data?.zora20Token?.mediaContent,
-    volume: coin?.data?.zora20Token?.totalVolume,
+    address: coin?.address,
+    creatorAddress: coin?.creatorAddress,
+    marketCap: coin?.marketCap,
+    uniqueHolders: coin?.uniqueHolders,
+    mediaContent: coin?.mediaContent,
+    volume: coin?.totalVolume,
   };
 };
 
@@ -77,7 +77,7 @@ export const fetchCreatorsPostsAndSave = async (uniqueKeyword: string, parentHas
 
     if (!coin) continue;
 
-    const info = await creatorsPost.creatorPostZoraModel.findOneAndUpdate({ hash: zora.address }, { $set: zora }, { upsert: true, new: true });
+    const info = await creatorsPost.creatorPostZoraModel.findOneAndUpdate({ address: coin.address }, { $set: coin }, { upsert: true, new: true });
     zoraInfo.push(info);
   }
 
@@ -95,7 +95,7 @@ export const fetchCreatorsPostsAndSave = async (uniqueKeyword: string, parentHas
     {
       $set: {
         creatorsPostsFarcaster: farcasterInfo.map((p) => new mongoose.Types.ObjectId(p._id)),
-        creatorPostsZora: zoraInfo.map((a) => new mongoose.Types.ObjectId(a._id)),
+        creatorsPostsZora: zoraInfo.map((a) => new mongoose.Types.ObjectId(a._id)),
       },
     },
     { new: true }

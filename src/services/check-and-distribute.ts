@@ -59,9 +59,9 @@ export const checkAndDistribute = async () => {
       const rewards = calculateRewards(bountyData.creatorsPostsFarcaster[0], bountyData.creatorsPostsZora[0]);
 
       // Convert rewards to the format expected by the split contract
-      const recipients = rewards.map(reward => ({
+      const recipients = rewards.map((reward) => ({
         address: reward.address as `0x${string}`,
-        percentAllocation: Math.floor(reward.rewardPercentage * 100) // Convert percentage to basis points
+        percentAllocation: Math.floor(reward.rewardPercentage * 100), // Convert percentage to basis points
       }));
 
       try {

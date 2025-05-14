@@ -3,8 +3,10 @@ import bounty from "../models/bounty";
 import { BountyDocument } from "../types/bounty";
 import { calculateRewards } from "./calculate-score";
 import { SplitContractService } from "./splitContract";
+import { ClankerService } from "./clankerService";
 
 const splitContractService = new SplitContractService();
+const clankerService = new ClankerService();
 
 export type ICreatorPostFarcasterPoints = {
   _id: mongoose.Types.ObjectId;
@@ -30,6 +32,61 @@ interface PopulatedBounty extends Omit<BountyDocument, "creatorsPostsFarcaster" 
   creatorsPostsZora: Array<ICreatorPostZoraPoints[]>;
 }
 
+const processZoraBounty = async (bountyData: PopulatedBounty) => {
+  const rewards = calculateRewards(bountyData.creatorsPostsFarcaster[0], bountyData.creatorsPostsZora[0]);
+
+  // Convert rewards to the format expected by the split contract
+  const recipients = rewards.map(reward => ({
+    address: reward.address as `0x${string}`,
+    percentAllocation: Math.floor(reward.rewardPercentage * 100) // Convert percentage to basis points
+  }));
+
+  // Update the split contract with new recipients
+  await splitContractService.updateSplit({
+    splitAddress: bountyData.splitAddress as `0x${string}`,
+    recipients,
+    distributorFeePercent: 1, // 1% distributor fee
+    totalAllocationPercent: 10000, // 100% in basis points
+  });
+
+  // Distribute the funds
+  await splitContractService.distributeSplit({
+    splitAddress: bountyData.splitAddress as `0x${string}`,
+    tokenAddress: bountyData.link as `0x${string}`,
+  });
+};
+
+const processClankerBounty = async (bountyData: PopulatedBounty) => {
+  // Get uncollected fees from Clanker
+  const clankerRewards = await clankerService.getUncollectedFees(bountyData.link);
+
+  // Collect rewards and send to split contract
+  await clankerService.collectAndSendToSplit(bountyData.link, bountyData.splitAddress);
+
+  // Calculate rewards based on engagement
+  const rewards = calculateRewards(bountyData.creatorsPostsFarcaster[0], bountyData.creatorsPostsZora[0]);
+
+  // Convert rewards to the format expected by the split contract
+  const recipients = rewards.map(reward => ({
+    address: reward.address as `0x${string}`,
+    percentAllocation: Math.floor(reward.rewardPercentage * 100) // Convert percentage to basis points
+  }));
+
+  // Update the split contract with new recipients
+  await splitContractService.updateSplit({
+    splitAddress: bountyData.splitAddress as `0x${string}`,
+    recipients,
+    distributorFeePercent: 1, // 1% distributor fee
+    totalAllocationPercent: 10000, // 100% in basis points
+  });
+
+  // Distribute the funds
+  await splitContractService.distributeSplit({
+    splitAddress: bountyData.splitAddress as `0x${string}`,
+    tokenAddress: bountyData.link as `0x${string}`,
+  });
+};
+
 export const checkAndDistribute = async () => {
   try {
     //@ts-ignore
@@ -42,12 +99,12 @@ export const checkAndDistribute = async () => {
       .populate<{ creatorsPostsFarcaster: ICreatorPostFarcasterPoints[] }>({
         path: "creatorsPostsFarcaster",
         model: "CreatorPostFarcaster",
-        select: "address likes_count recasts_count replies_count followers following", // Only select fields we need
+        select: "address likes_count recasts_count replies_count followers following",
       })
       .populate<{ creatorPostsZora: ICreatorPostZoraPoints[] }>({
         path: "creatorsPostsZora",
         model: "CreatorPostZora",
-        select: "address marketCap uniqueHolders volume", // Only select fields we need
+        select: "address marketCap uniqueHolders volume",
       })
       .exec()) as PopulatedBounty[];
 
@@ -56,28 +113,12 @@ export const checkAndDistribute = async () => {
     }
 
     for (const bountyData of bountyInfo) {
-      const rewards = calculateRewards(bountyData.creatorsPostsFarcaster[0], bountyData.creatorsPostsZora[0]);
-
-      // Convert rewards to the format expected by the split contract
-      const recipients = rewards.map(reward => ({
-        address: reward.address as `0x${string}`,
-        percentAllocation: Math.floor(reward.rewardPercentage * 100) // Convert percentage to basis points
-      }));
-
       try {
-        // Update the split contract with new recipients
-        await splitContractService.updateSplit({
-          splitAddress: bountyData.splitAddress as `0x${string}`,
-          recipients,
-          distributorFeePercent: 1, // 1% distributor fee
-          totalAllocationPercent: 10000, // 100% in basis points
-        });
-
-        // Distribute the funds
-        await splitContractService.distributeSplit({
-          splitAddress: bountyData.splitAddress as `0x${string}`,
-          tokenAddress: bountyData.link as `0x${string}`, // Assuming link is the token address
-        });
+        if (bountyData.isZora) {
+          await processZoraBounty(bountyData);
+        } else {
+          await processClankerBounty(bountyData);
+        }
 
         // Mark bounty as finalized
         await bounty.findOneAndUpdate({ _id: bountyData._id }, { $set: { isFinalized: true } });

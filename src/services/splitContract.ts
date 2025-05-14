@@ -1,7 +1,7 @@
 import { SplitV2Client } from "@0xsplits/splits-sdk";
 import { createPublicClient, createWalletClient, http } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
-import { mainnet } from "viem/chains";
+import { base } from "viem/chains";
 import { UpdateSplitV2Config } from "@0xsplits/splits-sdk/types";
 import { Address } from "viem";
 
@@ -13,7 +13,7 @@ export class SplitContractService {
   constructor() {
     // Initialize clients
     this.publicClient = createPublicClient({
-      chain: mainnet,
+      chain: base,
       transport: http(),
     });
 
@@ -21,13 +21,13 @@ export class SplitContractService {
     const account = privateKeyToAccount(process.env.WALLET_PRIVATE_KEY as `0x${string}`);
     this.walletClient = createWalletClient({
       account,
-      chain: mainnet,
+      chain: base,
       transport: http(),
     });
 
     // Initialize splits client
     this.splitsClient = new SplitV2Client({
-      chainId: mainnet.id,
+      chainId: base.id,
       publicClient: this.publicClient,
       walletClient: this.walletClient,
     });

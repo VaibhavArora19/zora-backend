@@ -4,6 +4,7 @@ import cors from "cors";
 import bodyParser from "body-parser";
 import mongoose from "mongoose";
 import bountyRoutes from "./routes/bounty";
+import splitContractRoutes from "./routes/splitContract";
 import cron from "node-cron";
 import { getBountyInfoAndSaveCreator } from "./services/creatorsPost";
 import { checkAndDistribute } from "./services/check-and-distribute";
@@ -15,6 +16,7 @@ const app = express();
 app.use(bodyParser.json());
 app.use(cors());
 app.use(bountyRoutes);
+app.use(splitContractRoutes);
 
 cron.schedule("0 * * * *", async () => {
   await getBountyInfoAndSaveCreator();

@@ -33,12 +33,13 @@ interface PopulatedBounty extends Omit<BountyDocument, "creatorsPostsFarcaster" 
 }
 
 const processZoraBounty = async (bountyData: PopulatedBounty) => {
+  // Calculate rewards using the same logic as upstream
   const rewards = calculateRewards(bountyData.creatorsPostsFarcaster[0], bountyData.creatorsPostsZora[0]);
 
-  // Convert rewards to the format expected by the split contract
-  const recipients = rewards.map(reward => ({
+  // Convert rewards to the format expected by the split contract (exactly as upstream)
+  const recipients = rewards.map((reward) => ({
     address: reward.address as `0x${string}`,
-    percentAllocation: Math.floor(reward.rewardPercentage * 100) // Convert percentage to basis points
+    percentAllocation: Math.floor(reward.rewardPercentage * 100), // Convert percentage to basis points
   }));
 
   // Update the split contract with new recipients
@@ -63,13 +64,13 @@ const processClankerBounty = async (bountyData: PopulatedBounty) => {
   // Collect rewards and send to split contract
   await clankerService.collectAndSendToSplit(bountyData.link, bountyData.splitAddress);
 
-  // Calculate rewards based on engagement
+  // Calculate rewards using the same logic as upstream
   const rewards = calculateRewards(bountyData.creatorsPostsFarcaster[0], bountyData.creatorsPostsZora[0]);
 
-  // Convert rewards to the format expected by the split contract
-  const recipients = rewards.map(reward => ({
+  // Convert rewards to the format expected by the split contract (exactly as upstream)
+  const recipients = rewards.map((reward) => ({
     address: reward.address as `0x${string}`,
-    percentAllocation: Math.floor(reward.rewardPercentage * 100) // Convert percentage to basis points
+    percentAllocation: Math.floor(reward.rewardPercentage * 100), // Convert percentage to basis points
   }));
 
   // Update the split contract with new recipients

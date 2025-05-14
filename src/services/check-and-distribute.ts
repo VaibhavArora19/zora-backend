@@ -2,6 +2,9 @@ import mongoose from "mongoose";
 import bounty from "../models/bounty";
 import { BountyDocument } from "../types/bounty";
 import { calculateRewards } from "./calculate-score";
+import { SplitContractService } from "./splitContract";
+
+const splitContractService = new SplitContractService();
 
 export type ICreatorPostFarcasterPoints = {
   _id: mongoose.Types.ObjectId;
@@ -55,10 +58,34 @@ export const checkAndDistribute = async () => {
     for (const bountyData of bountyInfo) {
       const rewards = calculateRewards(bountyData.creatorsPostsFarcaster[0], bountyData.creatorsPostsZora[0]);
 
-      //*send these details to the contract
+      // Convert rewards to the format expected by the split contract
+      const recipients = rewards.map(reward => ({
+        address: reward.address as `0x${string}`,
+        percentAllocation: Math.floor(reward.rewardPercentage * 100) // Convert percentage to basis points
+      }));
 
-      //distribute rewards here
-      await bounty.findOneAndUpdate({ _id: bountyData._id }, { $set: { isFinalized: true } });
+      try {
+        // Update the split contract with new recipients
+        await splitContractService.updateSplit({
+          splitAddress: bountyData.splitAddress as `0x${string}`,
+          recipients,
+          distributorFeePercent: 1, // 1% distributor fee
+          totalAllocationPercent: 10000, // 100% in basis points
+        });
+
+        // Distribute the funds
+        await splitContractService.distributeSplit({
+          splitAddress: bountyData.splitAddress as `0x${string}`,
+          tokenAddress: bountyData.link as `0x${string}`, // Assuming link is the token address
+        });
+
+        // Mark bounty as finalized
+        await bounty.findOneAndUpdate({ _id: bountyData._id }, { $set: { isFinalized: true } });
+      } catch (error) {
+        console.error(`Error processing bounty ${bountyData._id}:`, error);
+        // Continue with next bounty even if this one fails
+        continue;
+      }
     }
   } catch (error) {
     console.error("Error in checkAndDistribute:", error);

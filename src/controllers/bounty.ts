@@ -20,7 +20,7 @@ export const createBounty = async (req: Request, res: Response, next: NextFuncti
       keywords,
     });
 
-    const message = `Post: ${uniqueKeyword} \n\nNew bounty created for the token ${link} \n\nTrading fees percentage: ${budgetPercentage}% \n\nCampaign Start Date: ${campaignStartDate.toLocaleString()} \n\nCampaign End Date: ${campaignEndDate.toLocaleString()}. \n\nKeywords: ${keywords.join(
+    const message = `Post: ${uniqueKeyword} \n\nNew bounty created for the token ${link} \n\nTrading fees percentage: ${budgetPercentage}% \n\nCampaign Start Date: ${campaignStartDate.toLocaleDateString()} \n\nCampaign End Date: ${campaignEndDate.toLocaleDateString()} \n\nKeywords: ${keywords.join(
       ", "
     )}`;
     await postOnFarcaster(message);

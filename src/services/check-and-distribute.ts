@@ -4,9 +4,11 @@ import { BountyDocument } from "../types/bounty";
 import { calculateRewards } from "./calculate-score";
 import { SplitContractService } from "./splitContract";
 import { ClankerService } from "./clankerService";
+import { ZoraBalanceService } from './services/zoraBalanceService';
 
 const splitContractService = new SplitContractService();
 const clankerService = new ClankerService();
+const zoraBalanceService = new ZoraBalanceService();
 
 export type ICreatorPostFarcasterPoints = {
   _id: mongoose.Types.ObjectId;
@@ -134,3 +136,16 @@ export const checkAndDistribute = async () => {
     throw error;
   }
 };
+
+// Example usage
+async function checkBalance() {
+  try {
+    const coinAddress = "0xYourCoinAddress" as Address;
+    const userAddress = "0xUserAddress" as Address;
+    
+    const balance = await zoraBalanceService.getCoinBalance(coinAddress, userAddress);
+    console.log(`Balance: ${balance.formattedBalance} ETH`);
+  } catch (error) {
+    console.error('Error:', error);
+  }
+}

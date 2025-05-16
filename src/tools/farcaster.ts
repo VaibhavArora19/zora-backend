@@ -37,12 +37,10 @@ export const postOnFarcaster = async (message: string) => {
   });
   const signerUuid = "27a08f94-a6a1-4180-8830-1635db9361df";
 
-  neynarClient
-    .publishCast({
-      signerUuid,
-      text: message,
-    })
-    .then((response: any) => {
-      console.log("cast:", response.cast);
-    });
+  const data = await neynarClient.publishCast({
+    signerUuid,
+    text: message,
+  });
+
+  return data;
 };

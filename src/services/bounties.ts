@@ -3,7 +3,7 @@ import bounty from "../models/bounty";
 
 export const getAllBounties = async () => {
   try {
-    const bounties = await bounty.find({});
+    const bounties = await bounty.find({}).lean();
 
     return bounties;
   } catch (error) {
@@ -13,9 +13,19 @@ export const getAllBounties = async () => {
 
 export const getBountByKeyword = async (keyword: string) => {
   try {
-    const bountyByKeyword = await bounty.findOne({ uniqueKeyword: keyword });
+    const bountyByKeyword = await bounty.findOne({ uniqueKeyword: keyword }).lean();
 
-    return bountyByKeyword;
+    if (!bountyByKeyword) throw new Error("No bounty found");
+
+    return {
+      ...bountyByKeyword,
+      status:
+        bountyByKeyword.campaignStartDate < new Date() && bountyByKeyword.campaignEndDate > new Date()
+          ? "active"
+          : bountyByKeyword.campaignStartDate > new Date()
+          ? "upcoming"
+          : "completed",
+    };
   } catch (error) {
     throw error;
   }
@@ -23,9 +33,14 @@ export const getBountByKeyword = async (keyword: string) => {
 
 export const getActiveBounties = async () => {
   try {
-    const activeBounties = await bounty.find({ campaignStartDate: { $lt: new Date() }, campaignEndDate: { $gt: new Date() } });
+    const activeBounties = await bounty.find({ campaignStartDate: { $lt: new Date() }, campaignEndDate: { $gt: new Date() } }).lean();
 
-    return activeBounties;
+    return activeBounties.map((bounty) => {
+      return {
+        ...bounty,
+        status: "active",
+      };
+    });
   } catch (error) {
     throw error;
   }
@@ -33,9 +48,14 @@ export const getActiveBounties = async () => {
 
 export const getUpcomingBounties = async () => {
   try {
-    const upcomingBounties = await bounty.find({ campaignStartDate: { $gt: new Date() } });
+    const upcomingBounties = await bounty.find({ campaignStartDate: { $gt: new Date() } }).lean();
 
-    return upcomingBounties;
+    return upcomingBounties.map((bounty) => {
+      return {
+        ...bounty,
+        status: "upcoming",
+      };
+    });
   } catch (error) {
     throw error;
   }
@@ -43,9 +63,14 @@ export const getUpcomingBounties = async () => {
 
 export const getCompletedBounties = async () => {
   try {
-    const completedBounties = await bounty.find({ campaignEndDate: { $lt: new Date() }, isFinalized: true });
+    const completedBounties = await bounty.find({ campaignEndDate: { $lt: new Date() }, isFinalized: true }).lean();
 
-    return completedBounties;
+    return completedBounties.map((bounty) => {
+      return {
+        ...bounty,
+        status: "completed",
+      };
+    });
   } catch (error) {
     throw error;
   }
@@ -53,7 +78,7 @@ export const getCompletedBounties = async () => {
 
 export const getBountyByAddress = async (creatorAddress: string) => {
   try {
-    const bountyByAddress = await bounty.find({ creatorAddress });
+    const bountyByAddress = await bounty.find({ creatorAddress }).lean();
 
     return bountyByAddress;
   } catch (error) {

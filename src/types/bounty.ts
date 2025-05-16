@@ -5,6 +5,7 @@ export interface IBounty {
   description?: string;
   creatorAddress: string;
   tokenId?: string;
+  hash: string;
   link: string;
   isZora: boolean;
   budgetPercentage: string;

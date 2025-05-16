@@ -4,6 +4,7 @@ import { BountyDocument } from "../types/bounty";
 const bountySchema = new Schema<BountyDocument>({
   title: { type: String, required: true },
   description: { type: String },
+  hash: { type: String, required: true, unique: true },
   creatorAddress: { type: String, required: true },
   tokenId: { type: String },
   link: { type: String, required: true },

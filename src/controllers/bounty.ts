@@ -18,9 +18,13 @@ export const createBounty = async (req: Request, res: Response, next: NextFuncti
   const uniqueKeyword = randomstring.generate(7);
 
   try {
+    // Convert date strings to Date objects if needed
+    const startDate = campaignStartDate instanceof Date ? campaignStartDate : new Date(campaignStartDate);
+    const endDate = campaignEndDate instanceof Date ? campaignEndDate : new Date(campaignEndDate);
+
     const message = `Post: ${uniqueKeyword} \n\nNew bounty created for the token ${link} \n\nTitle: ${title} ${
       description ? `\n\nDescription: ${description}` : ""
-    } \n\nTrading fees percentage: ${budgetPercentage}% \n\nCampaign Start Date: ${campaignStartDate.toLocaleDateString()} \n\nCampaign End Date: ${campaignEndDate.toLocaleDateString()} \n\nKeywords: ${keywords.join(
+    } \n\nTrading fees percentage: ${budgetPercentage}% \n\nCampaign Start Date: ${startDate.toLocaleDateString()} \n\nCampaign End Date: ${endDate.toLocaleDateString()} \n\nKeywords: ${keywords.join(
       ", "
     )}`;
 
@@ -36,8 +40,8 @@ export const createBounty = async (req: Request, res: Response, next: NextFuncti
       uniqueKeyword,
       splitAddress,
       budgetPercentage,
-      campaignStartDate,
-      campaignEndDate,
+      campaignStartDate: startDate,
+      campaignEndDate: endDate,
       keywords,
       hash: farcasterData.cast.hash,
     });

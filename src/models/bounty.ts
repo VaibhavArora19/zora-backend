@@ -2,6 +2,10 @@ import mongoose, { Schema } from "mongoose";
 import { BountyDocument } from "../types/bounty";
 
 const bountySchema = new Schema<BountyDocument>({
+  title: { type: String, required: true },
+  description: { type: String },
+  creatorAddress: { type: String, required: true },
+  tokenId: { type: String },
   link: { type: String, required: true },
   isZora: { type: Boolean, default: false },
   budgetPercentage: { type: String, required: true },

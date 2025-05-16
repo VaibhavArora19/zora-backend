@@ -30,3 +30,33 @@ export const getActiveBounties = async () => {
     throw error;
   }
 };
+
+export const getUpcomingBounties = async () => {
+  try {
+    const upcomingBounties = await bounty.find({ campaignStartDate: { $gt: new Date() } });
+
+    return upcomingBounties;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const getCompletedBounties = async () => {
+  try {
+    const completedBounties = await bounty.find({ campaignEndDate: { $lt: new Date() }, isFinalized: true });
+
+    return completedBounties;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const getBountyByAddress = async (creatorAddress: string) => {
+  try {
+    const bountyByAddress = await bounty.find({ creatorAddress });
+
+    return bountyByAddress;
+  } catch (error) {
+    throw error;
+  }
+};

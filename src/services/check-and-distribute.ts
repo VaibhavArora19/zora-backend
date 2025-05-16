@@ -4,7 +4,8 @@ import { BountyDocument } from "../types/bounty";
 import { calculateRewards } from "./calculate-score";
 import { SplitContractService } from "./splitContract";
 import { ClankerService } from "./clankerService";
-import { ZoraBalanceService } from './services/zoraBalanceService';
+import { ZoraBalanceService } from "./zoraBalanceService";
+import { Address } from 'viem';
 
 const splitContractService = new SplitContractService();
 const clankerService = new ClankerService();

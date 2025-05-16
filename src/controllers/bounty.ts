@@ -18,6 +18,14 @@ export const createBounty = async (req: Request, res: Response, next: NextFuncti
   const uniqueKeyword = randomstring.generate(7);
 
   try {
+    const message = `Post: ${uniqueKeyword} \n\nNew bounty created for the token ${link} \n\nTitle: ${title} ${
+      description ? `\n\nDescription: ${description}` : ""
+    } \n\nTrading fees percentage: ${budgetPercentage}% \n\nCampaign Start Date: ${campaignStartDate.toLocaleDateString()} \n\nCampaign End Date: ${campaignEndDate.toLocaleDateString()} \n\nKeywords: ${keywords.join(
+      ", "
+    )}`;
+
+    const farcasterData = await postOnFarcaster(message);
+
     const newBounty = new bounty({
       title,
       description,
@@ -31,19 +39,13 @@ export const createBounty = async (req: Request, res: Response, next: NextFuncti
       campaignStartDate,
       campaignEndDate,
       keywords,
+      hash: farcasterData.cast.hash,
     });
-
-    const message = `Post: ${uniqueKeyword} \n\nNew bounty created for the token ${link} \n\nTitle: ${title} ${
-      description ? `\n\nDescription: ${description}` : ""
-    } \n\nTrading fees percentage: ${budgetPercentage}% \n\nCampaign Start Date: ${campaignStartDate.toLocaleDateString()} \n\nCampaign End Date: ${campaignEndDate.toLocaleDateString()} \n\nKeywords: ${keywords.join(
-      ", "
-    )}`;
-
-    await postOnFarcaster(message);
 
     await newBounty.save();
     res.status(201).json(newBounty);
   } catch (error) {
+    console.log("error: ", error);
     res.json({ error: "Error creating bounty" });
   }
 };

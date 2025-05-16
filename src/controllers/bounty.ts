@@ -42,7 +42,7 @@ export const createBounty = async (req: Request, res: Response, next: NextFuncti
     await postOnFarcaster(message);
 
     await newBounty.save();
-    res.status(201).json({ newBounty });
+    res.status(201).json(newBounty);
   } catch (error) {
     res.json({ error: "Error creating bounty" });
   }
@@ -52,7 +52,7 @@ export const getAllBountiesController = async (req: Request, res: Response, next
   try {
     const allBounties = await getAllBounties();
 
-    res.status(200).json({ allBounties });
+    res.status(200).json(allBounties);
   } catch (error) {
     res.json({ error: "Error getting bounties" });
   }
@@ -64,7 +64,7 @@ export const getBountyByKeywordController = async (req: Request, res: Response, 
   try {
     const bountyByKeyword = await getBountByKeyword(keyword);
 
-    res.status(200).json({ bountyByKeyword });
+    res.status(200).json(bountyByKeyword);
   } catch (error) {
     res.json({ error: "Error getting bounty" });
   }
@@ -74,7 +74,7 @@ export const getActiveBountiesController = async (req: Request, res: Response, n
   try {
     const activeBounties = await getActiveBounties();
 
-    res.status(200).json({ activeBounties });
+    res.status(200).json(activeBounties);
   } catch (error) {
     res.json({ error: "Error getting active bounties" });
   }
@@ -84,7 +84,7 @@ export const getUpcomingBountiesController = async (req: Request, res: Response,
   try {
     const upcomingBounties = await getUpcomingBounties();
 
-    res.status(200).json({ upcomingBounties });
+    res.status(200).json(upcomingBounties);
   } catch (error) {
     res.json({ error: "Error getting upcoming bounties" });
   }
@@ -94,7 +94,7 @@ export const getCompletedBountiesController = async (req: Request, res: Response
   try {
     const completedBounties = await getCompletedBounties();
 
-    res.status(200).json({ completedBounties });
+    res.status(200).json(completedBounties);
   } catch (error) {
     res.json({ error: "Error getting completed bounties" });
   }
@@ -106,7 +106,7 @@ export const getBountyByAddressController = async (req: Request, res: Response, 
   try {
     const bountyByAddress = await getBountyByAddress(address);
 
-    res.status(200).json({ bountyByAddress });
+    res.status(200).json(bountyByAddress);
   } catch (error) {
     res.json({ error: "Error getting bounty" });
   }

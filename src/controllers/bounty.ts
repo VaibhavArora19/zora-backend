@@ -15,6 +15,8 @@ export const createBounty = async (req: Request, res: Response, next: NextFuncti
   const { title, description, creatorAddress, tokenId, link, isZora, splitAddress, budgetPercentage, campaignStartDate, campaignEndDate, keywords } =
     req.body;
 
+  console.log("req.body: ", req.body);
+
   const uniqueKeyword = randomstring.generate(7);
 
   try {
@@ -22,13 +24,16 @@ export const createBounty = async (req: Request, res: Response, next: NextFuncti
     const startDate = campaignStartDate instanceof Date ? campaignStartDate : new Date(campaignStartDate);
     const endDate = campaignEndDate instanceof Date ? campaignEndDate : new Date(campaignEndDate);
 
+    // Updated message format to match what's expected by Farcaster
     const message = `Post: ${uniqueKeyword} \n\nNew bounty created for the token ${link} \n\nTitle: ${title} ${
       description ? `\n\nDescription: ${description}` : ""
-    } \n\nTrading fees percentage: ${budgetPercentage}% \n\nCampaign Start Date: ${startDate.toLocaleDateString()} \n\nCampaign End Date: ${endDate.toLocaleDateString()} \n\nKeywords: ${keywords.join(
+    } \n\nBudget: ${budgetPercentage}% \n\nCampaign Start Date: ${startDate.toLocaleDateString()} \n\nCampaign End Date: ${endDate.toLocaleDateString()} \n\nKeywords: ${keywords.join(
       ", "
     )}`;
 
     const farcasterData = await postOnFarcaster(message);
+
+    console.log("farcasterData: ", farcasterData);
 
     const newBounty = new bounty({
       title,
@@ -47,9 +52,11 @@ export const createBounty = async (req: Request, res: Response, next: NextFuncti
     });
 
     await newBounty.save();
+    console.log("newBounty: ", newBounty);
     res.status(201).json(newBounty);
-  } catch (error) {
+  } catch (error: any) {
     console.log("error: ", error);
+    console.log("error.message: ", error.message);
     res.json({ error: "Error creating bounty" });
   }
 };

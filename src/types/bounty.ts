@@ -1,6 +1,10 @@
 import { Document, Types } from "mongoose";
 
 export interface IBounty {
+  title: string;
+  description?: string;
+  creatorAddress: string;
+  tokenId?: string;
   link: string;
   isZora: boolean;
   budgetPercentage: string;

@@ -60,36 +60,81 @@ const processZoraBounty = async (bountyData: PopulatedBounty) => {
   });
 };
 
-const processClankerBounty = async (bountyData: PopulatedBounty) => {
-  // Get uncollected fees from Clanker
-  const clankerRewards = await clankerService.getUncollectedFees(bountyData.link);
 
-  // Collect rewards and send to split contract
-  await clankerService.collectAndSendToSplit(bountyData.link, bountyData.splitAddress);
+const fetchAddressFromLink = (link: string) => {
+  // Extract the contract address from the link
+  const contractAddressMatch = link.match(/0x[a-fA-F0-9]{40}/);
+  if (!contractAddressMatch) {
+    throw new Error('Invalid link format: No contract address found');
+  }
+  return contractAddressMatch[0];
+};
+
+export const processClankerBounty = async (bountyData: PopulatedBounty) => {
+
+  console.log("reached here bountyData ", bountyData)
+  const contractAddress = fetchAddressFromLink(bountyData.link);
+  // Get uncollected fees from Clanker
+  const clankerRewards = await clankerService.getUncollectedFees(contractAddress);
+
+
+  if (clankerRewards.token0UncollectedRewards == "0" && clankerRewards.token1UncollectedRewards == "0") {
+    console.log("reached here clankerRewards ", clankerRewards)
+    return;
+  }
+
+  console.log("reached here clankerRewards ", clankerRewards)
+
+  // // Collect rewards and send to split contract
+  await clankerService.collectAndSendToSplit(clankerRewards);
 
   // Calculate rewards using the same logic as upstream
   const rewards = calculateRewards(bountyData.creatorsPostsFarcaster[0], bountyData.creatorsPostsZora[0]);
 
+
+  console.log("reached here rewards ", rewards)
+
+  if (rewards.length > 0) {
+
   // Convert rewards to the format expected by the split contract (exactly as upstream)
-  const recipients = rewards.map((reward) => ({
-    address: reward.address as `0x${string}`,
-    percentAllocation: Math.floor(reward.rewardPercentage * 100), // Convert percentage to basis points
-  }));
+    const recipients = rewards.map((reward) => ({
+      address: reward.address as `0x${string}`,
+      percentAllocation: Math.floor(reward.rewardPercentage * 100 * Number(bountyData.budgetPercentage)), // Convert percentage to basis points
+    }));
 
-  // Update the split contract with new recipients
-  await splitContractService.updateSplit({
-    splitAddress: bountyData.splitAddress as `0x${string}`,
-    recipients,
-    distributorFeePercent: 1, // 1% distributor fee
-    totalAllocationPercent: 10000, // 100% in basis points
-  });
+    recipients.push({
+      address: bountyData.creatorAddress as `0x${string}`,
+      percentAllocation: (100 - Number(bountyData.budgetPercentage)) * 100, 
+    })
 
-  // Distribute the funds
-  await splitContractService.distributeSplit({
-    splitAddress: bountyData.splitAddress as `0x${string}`,
-    tokenAddress: bountyData.link as `0x${string}`,
-  });
-};
+
+    console.log("reached here recipients ", recipients)
+
+    // Update the split contract with new recipients
+    await splitContractService.updateSplit({
+      splitAddress: bountyData.splitAddress as `0x${string}`,
+      recipients,
+      distributorFeePercent: 1, // 1% distributor fee
+      totalAllocationPercent: 10000, // 100% in basis points
+    });
+
+    // Distribute token0 rewards
+    if (clankerRewards.token0UncollectedRewards !== "0") {
+      await splitContractService.distributeSplit({
+        splitAddress: bountyData.splitAddress as `0x${string}`,
+        tokenAddress: clankerRewards.token0.address as `0x${string}`,
+      });
+    }
+
+    // Distribute token1 rewards
+    if (clankerRewards.token1UncollectedRewards !== "0") {
+      await splitContractService.distributeSplit({
+        splitAddress: bountyData.splitAddress as `0x${string}`,
+        tokenAddress: clankerRewards.token1.address as `0x${string}`,
+      });
+    }
+  }
+}
 
 export const checkAndDistribute = async () => {
   try {
@@ -97,7 +142,7 @@ export const checkAndDistribute = async () => {
     const bountyInfo = (await bounty
       .find({
         campaignEndDate: { $lt: new Date() },
-        isFinalized: false,
+        // isFinalized: false,
       })
       .lean()
       .populate<{ creatorsPostsFarcaster: ICreatorPostFarcasterPoints[] }>({
@@ -111,6 +156,9 @@ export const checkAndDistribute = async () => {
         select: "address marketCap uniqueHolders volume",
       })
       .exec()) as PopulatedBounty[];
+
+
+    console.log("reached here bountyInfo ", bountyInfo)
 
     if (!bountyInfo || bountyInfo.length === 0) {
       return [];

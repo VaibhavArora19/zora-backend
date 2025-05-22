@@ -18,7 +18,7 @@ async function testClankerAPI() {
     console.log('Uncollected fees:', fees);
     
     // Test collectAndSendToSplit
-    await clankerService.collectAndSendToSplit(contractAddress, splitAddress);
+    await clankerService.collectAndSendToSplit(fees);
     
     console.log('Tests completed successfully');
   } catch (error) {

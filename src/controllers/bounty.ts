@@ -124,3 +124,15 @@ export const getBountyByAddressController = async (req: Request, res: Response, 
     res.json({ error: "Error getting bounty" });
   }
 };
+
+export const getBountyByIdController = async (req: Request, res: Response, next: NextFunction) => {
+  const { id } = req.params;
+
+  try {
+    const bountyById = await bounty.findById(id);
+
+    res.status(200).json(bountyById);
+  } catch (error) {
+    res.json({ error: "Error getting bounty" });
+  }
+};

@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { createPublicClient, createWalletClient, http, Address } from 'viem';
+import { privateKeyToAccount } from 'viem/accounts';
 import { base } from 'viem/chains';
 
 interface ClankerTokenInfo {
@@ -22,7 +23,7 @@ interface ClankerRewardsResponse {
 // Clanker LP Locker ABI for the claimRewards function
 const CLANKER_LP_LOCKER_ABI = [
   {
-    name: "claimRewards",
+    name: "collectRewards",
     inputs: [
       { name: "tokenId", type: "uint256" }
     ],
@@ -57,10 +58,13 @@ export class ClankerService {
       throw new Error('WALLET_PRIVATE_KEY is not set in environment variables');
     }
 
+
+    const account = privateKeyToAccount(privateKey);
+
     this.walletClient = createWalletClient({
       chain: base,
       transport: http(),
-      account: privateKey
+      account: account
     });
   }
 
@@ -110,14 +114,12 @@ export class ClankerService {
   }
 
   // Function to collect rewards and send to split contract
-  async collectAndSendToSplit(contractAddress: string, splitAddress: string): Promise<void> {
+  async collectAndSendToSplit(rewards: ClankerRewardsResponse): Promise<void> {
     try {
-      // First get the uncollected fees
-      const rewards = await this.getUncollectedFees(contractAddress);
 
       console.log('Rewards:', rewards);
       
-      console.log('Collected rewards:', {
+      console.log('Unclaimed rewards:', {
         token0: {
           symbol: rewards.token0.symbol,
           amount: rewards.token0UncollectedRewards
@@ -134,22 +136,26 @@ export class ClankerService {
 
       console.log(`Claiming rewards for token ID ${tokenId} from LP Locker ${lpLockerAddress}`);
 
-      // Prepare the transaction
+      // // Prepare the transaction
       const { request } = await this.publicClient.simulateContract({
         address: lpLockerAddress,
         abi: CLANKER_LP_LOCKER_ABI,
-        functionName: 'claimRewards',
+        functionName: 'collectRewards',
         args: [tokenId],
         account: this.walletClient.account
       });
 
-      // Send the transaction
+      console.log('Request:', request);
+
+      // // Send the transaction
       const hash = await this.walletClient.writeContract(request);
       console.log('Claim rewards transaction sent:', hash);
 
-      // Wait for transaction to be mined
+      // // Wait for transaction to be mined
       const receipt = await this.publicClient.waitForTransactionReceipt({ hash });
       console.log('Claim rewards transaction confirmed:', receipt);
+
+      //
 
       // Note: The rewards will be automatically distributed according to the contract's logic:
       // - 20% to Clanker

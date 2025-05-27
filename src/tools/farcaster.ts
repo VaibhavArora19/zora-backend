@@ -1,11 +1,12 @@
 import dotenv from "dotenv";
 dotenv.config();
 import { NeynarAPIClient } from "@neynar/nodejs-sdk";
+import { FARCASTER_URL } from "../constants";
 
 export const fetchByMention = async (limit: string, query: string) => {
   try {
     // Construct URL with query parameters
-    const url = new URL("https://api.neynar.com/v2/farcaster/cast/search");
+    const url = new URL(`${FARCASTER_URL}/cast/search`);
     url.searchParams.append("q", query);
     url.searchParams.append("limit", limit);
 
@@ -44,3 +45,33 @@ export const postOnFarcaster = async (message: string) => {
 
   return data;
 };
+
+export const sendNotification = async (fids: string[],title: string, body: string, target_url: string) => {
+  try {
+
+    const response = await fetch(`${FARCASTER_URL}/frame/notifications`, {
+      method: "POST",
+      headers: {
+        "x-api-key": process.env.API_KEY as string,
+      },
+      body: JSON.stringify({
+        target_fids: fids,
+        notification: {
+          title,
+          body,
+          target_url,
+        }
+      })
+    });
+    
+    const data = await response.json();
+
+    console.log("Notification response:", data);
+    if (!response.ok) {
+      throw new Error(`Error sending notification: ${data.error}`);
+    }
+  } catch (error) {
+    console.error("Error sending notification:", error);
+    throw error;
+  }
+}

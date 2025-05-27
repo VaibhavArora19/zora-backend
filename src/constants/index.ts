@@ -1,0 +1,1 @@
+export const FARCASTER_URL = "https://api.neynar.com/v2/farcaster"

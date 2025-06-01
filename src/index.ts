@@ -9,6 +9,7 @@ import cron from "node-cron";
 import { getBountyInfoAndSaveCreator } from "./services/creatorsPost";
 import { checkAndDistribute } from "./services/check-and-distribute";
 import testRoutes from "./test";
+import farcasterRoutes from './routes/farcaster';
 
 dotenv.config();
 
@@ -19,6 +20,7 @@ app.use(cors());
 app.use(bountyRoutes);
 app.use(splitContractRoutes);
 app.use(testRoutes);
+app.use(farcasterRoutes);
 
 cron.schedule("0 * * * *", async () => {
   await getBountyInfoAndSaveCreator();
